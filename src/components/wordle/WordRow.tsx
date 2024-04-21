@@ -7,12 +7,22 @@ interface WordRowProps {
 }
 
 export default function WordRow({word, solution}:WordRowProps){
+
   const checkLetter = (index: number,letter: string) => {
+
+
     if(solution.includes(letter)){
       if(solution[index] === letter){
         return 'correct';
-      }else{
-        return 'present';
+      }else {
+        const solutionCount = solution.split(letter).length - 1;
+        const wordCount = word.split(letter).length - 1;
+
+        if (solutionCount >= wordCount) {
+          return 'present';
+        }else{
+          return 'absent';
+        }
       }
     }else{
       return 'absent';
