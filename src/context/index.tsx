@@ -1,11 +1,12 @@
 import { createContext, useState } from 'react';
-
+import { GameConfig } from '../types/types';
 export interface SessionContextInterface {
   user: string;
   fileName: string;
   generalScore: number;
   currentGame: string;
   currentGameScore: number;
+  games: GameConfig[];
 }
 
 export const SessionContext = createContext({
@@ -18,6 +19,7 @@ export const SessionContext = createContext({
   resetScore: () => void
   setUserName: (name: string) => void
   setCurrentGame: (game: string) => void
+  addGames: (games: GameConfig[]) => void
 });
 
 export function SessionProvider({children }: { children: React.ReactNode }) {
@@ -26,7 +28,8 @@ export function SessionProvider({children }: { children: React.ReactNode }) {
     fileName: "",
     generalScore: 0,
     currentGame: "",
-    currentGameScore: 0
+    currentGameScore: 0,
+    games: [{name:'',active:false,words:[''],description:''}]
   } as SessionContextInterface);
 
   
@@ -59,6 +62,12 @@ export function SessionProvider({children }: { children: React.ReactNode }) {
       currentGame: game
     }));
   }
+  function addGames(games: GameConfig[]) {
+    setSession((prev) => ({
+      ...prev,
+      games: games
+    }));
+  }
 
   return (
     <SessionContext.Provider value={
@@ -67,7 +76,8 @@ export function SessionProvider({children }: { children: React.ReactNode }) {
         addScore,
         resetScore,
         setUserName,
-        setCurrentGame
+        setCurrentGame,
+        addGames
       }
     }>
       {children}

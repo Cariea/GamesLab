@@ -5,3 +5,10 @@ export const enum GameStatus {
   Won,
   Lost,
 }
+
+export interface GameConfig {
+  name: string;
+  active: boolean;
+  words: string[];
+  description: string;
+}

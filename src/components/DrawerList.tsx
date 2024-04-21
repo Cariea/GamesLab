@@ -1,4 +1,4 @@
-import {useState,useContext} from 'react';
+import {useState,useContext, useEffect} from 'react';
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
@@ -17,6 +17,9 @@ import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import { SessionContext } from '../context';
 import Wordle from './wordle/Wordle';
+import { invoke } from "@tauri-apps/api/tauri";
+
+import { GameConfig } from "../types/types";
 const drawerWidth = 240;
 
 
@@ -43,8 +46,9 @@ const AppBar = styled(MuiAppBar, {
 }));
 
 
+
 export default function PersistentDrawerLeft() {
-  const {session,setCurrentGame  } = useContext(SessionContext);
+  const {session,setCurrentGame,addGames  } = useContext(SessionContext);
   const [open, setOpen] = useState(false);
 
   const handleGame = (name: string) => {
@@ -56,10 +60,17 @@ export default function PersistentDrawerLeft() {
   };
 
   const handleDrawerClose = (e:React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    console.log(e.target);
     setOpen(false);
   };
 
+  async function get_config() {
+    let config: GameConfig[] = await invoke("get_config");
+    addGames(config);
+  }
+
+  useEffect(() => {
+    get_config();
+  }, []);
   return (
     <>
     <Box sx={{ display: 'flex' }}  >
@@ -96,17 +107,17 @@ export default function PersistentDrawerLeft() {
     
 
         <List>
-          {['Super Mario Bros', 'Minecraft', 'Fortnite', 'Among Us','Dota 2','Valorant','Overwatch','FIFA 21'].map((text, index) => (
-            <ListItem key={text} disablePadding>
+          {session.games.map((game, index) => (
+            <ListItem key={game.name} disablePadding>
               <ListItemButton  onClick={() =>{
-                handleGame(text);
+                handleGame(game.name);
                 handleDrawerClose
               }
               }>
                 <ListItemIcon>
                   {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
                 </ListItemIcon>
-                <ListItemText primary={text} />
+                <ListItemText primary={game.name} />
               </ListItemButton>
             </ListItem>
           ))}
@@ -115,7 +126,7 @@ export default function PersistentDrawerLeft() {
     </Box>
     <Box component="main" sx={{ display:'flex',justifyContent:'center', marginTop:'78px'}}>
 
-      <Wordle />
+     {session.games.length > 1 && <Wordle />}
     </Box>
     <AppBar position="fixed" open={open}  sx={{ top: 'auto', bottom: 0,backgroundColor:'#006C67'}}>
     <Toolbar sx={{justifyContent:'space-between'}}>
