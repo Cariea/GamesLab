@@ -16,21 +16,37 @@ struct Config {
     games: Vec<Juego>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct ConfigData {
+    games: Vec<Juego>,
+    file_name: String,
+}
+
 #[tauri::command]
-fn get_config() -> Result<Vec<Juego>, Error> {
+fn get_config() -> Result<ConfigData, Error> {
     let path = std::env::current_exe()
         .expect("Error al obtener el path del ejecutable")
         .parent()
         .expect("Error al obtener el directorio del ejecutable")
         .to_owned();
     let config_path = path.join("config.json");
+
+    let file_name = config_path
+        .file_name()
+        .unwrap()
+        .to_string_lossy()
+        .into_owned();
+
     let mut file = File::open(config_path)?;
 
     let mut data = String::new();
     file.read_to_string(&mut data)?;
 
     let config: Config = serde_json::from_str(&data)?;
-    Ok(config.games)
+    Ok(ConfigData {
+        games: config.games,
+        file_name,
+    })
 }
 
 #[tauri::command]

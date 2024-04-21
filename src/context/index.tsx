@@ -20,6 +20,7 @@ export const SessionContext = createContext({
   setUserName: (name: string) => void
   setCurrentGame: (game: string) => void
   addGames: (games: GameConfig[]) => void
+  setFileName: (fileName: string) => void
 });
 
 export function SessionProvider({children }: { children: React.ReactNode }) {
@@ -69,6 +70,13 @@ export function SessionProvider({children }: { children: React.ReactNode }) {
     }));
   }
 
+  function setFileName(fileName: string) {
+    setSession((prev) => ({
+      ...prev,
+      fileName: fileName
+    }));
+  }
+
   return (
     <SessionContext.Provider value={
       {
@@ -77,7 +85,8 @@ export function SessionProvider({children }: { children: React.ReactNode }) {
         resetScore,
         setUserName,
         setCurrentGame,
-        addGames
+        addGames,
+        setFileName
       }
     }>
       {children}

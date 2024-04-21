@@ -13,7 +13,6 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import { SessionContext } from '../context';
 import Wordle from './wordle/Wordle';
@@ -48,7 +47,7 @@ const AppBar = styled(MuiAppBar, {
 
 
 export default function PersistentDrawerLeft() {
-  const {session,setCurrentGame,addGames  } = useContext(SessionContext);
+  const {session,setCurrentGame,addGames,setFileName } = useContext(SessionContext);
   const [open, setOpen] = useState(false);
 
   const handleGame = (name: string) => {
@@ -59,13 +58,15 @@ export default function PersistentDrawerLeft() {
     setOpen(true);
   };
 
-  const handleDrawerClose = (e:React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleDrawerClose = (_e:React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     setOpen(false);
   };
 
   async function get_config() {
-    let config: GameConfig[] = await invoke("get_config");
-    addGames(config);
+    let config:{file_name: string, games: GameConfig[]} = await invoke("get_config");
+    setFileName(config?.file_name);
+    addGames(config?.games);
+    setCurrentGame(config?.games[0].name);
   }
 
   useEffect(() => {
@@ -107,15 +108,15 @@ export default function PersistentDrawerLeft() {
     
 
         <List>
-          {session.games.map((game, index) => (
+          {session.games.map((game) => (
             <ListItem key={game.name} disablePadding>
-              <ListItemButton  onClick={() =>{
+              <ListItemButton disabled={!game.active} onClick={() =>{
                 handleGame(game.name);
                 handleDrawerClose
               }
               }>
                 <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                  { <MailIcon />}
                 </ListItemIcon>
                 <ListItemText primary={game.name} />
               </ListItemButton>
@@ -125,8 +126,9 @@ export default function PersistentDrawerLeft() {
       </Drawer>
     </Box>
     <Box component="main" sx={{ display:'flex',justifyContent:'center', marginTop:'78px'}}>
-
-     {session.games.length > 1 && <Wordle />}
+      {session.currentGame === "wordle" && <Wordle />}
+      {session.currentGame === "sopa de letras" && <p>{session.currentGame}</p>}
+      
     </Box>
     <AppBar position="fixed" open={open}  sx={{ top: 'auto', bottom: 0,backgroundColor:'#006C67'}}>
     <Toolbar sx={{justifyContent:'space-between'}}>
